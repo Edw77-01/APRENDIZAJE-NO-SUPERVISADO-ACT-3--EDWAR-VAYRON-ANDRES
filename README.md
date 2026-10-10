@@ -46,28 +46,6 @@ Porque permite agrupar automáticamente observaciones sin necesidad de etiquetas
 
 ---
 
-## Archivo de entrada: `rutas_transporte.json`
-
-Este archivo debe contener información estructurada de cada ruta de transporte. Un ejemplo de formato es:
-
-```json
-[
-  {
-    "id_ruta": 1,
-    "nombre_ruta": "Ruta A",
-    "distancia_km": 120,
-    "costo_pesos": 35000,
-    "tiempo_horas": 2.5
-  },
-  {
-    "id_ruta": 2,
-    "nombre_ruta": "Ruta B",
-    "distancia_km": 280,
-    "costo_pesos": 76000,
-    "tiempo_horas": 5.0
-  }
-]
-```
 
 ### Campos importantes
 
@@ -175,56 +153,6 @@ python analisis_rutas.py
 
 ---
 
-## Ejemplo de script principal
-
-```python
-import json
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
-
-# Cargar archivo JSON
-with open('rutas_transporte.json', 'r', encoding='utf-8') as archivo:
-    datos = json.load(archivo)
-
-# Convertir a DataFrame
-ruta_df = pd.DataFrame(datos)
-
-# Seleccionar variables para clustering
-X = ruta_df[['distancia_km', 'costo_pesos']].values
-
-# Estandarizar datos
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
-
-# Aplicar K-Means con 3 clusters
-kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
-ruta_df['cluster'] = kmeans.fit_predict(X_scaled)
-
-# Generar gráfico costo vs distancia
-plt.figure(figsize=(10, 6))
-for cluster in sorted(ruta_df['cluster'].unique()):
-    subset = ruta_df[ruta_df['cluster'] == cluster]
-    plt.scatter(subset['distancia_km'], subset['costo_pesos'], label=f'Cluster {cluster + 1}')
-
-centers = scaler.inverse_transform(kmeans.cluster_centers_)
-plt.scatter(centers[:, 0], centers[:, 1], c='black', marker='x', s=200, label='Centroides')
-
-plt.title('Relación costo vs distancia - Clustering K-Means')
-plt.xlabel('Distancia (km)')
-plt.ylabel('Costo (pesos)')
-plt.grid(True, alpha=0.3)
-plt.legend()
-plt.tight_layout()
-plt.savefig('grafico_clusters.png')
-plt.show()
-
-print(ruta_df[['id_ruta', 'distancia_km', 'costo_pesos', 'cluster']].head())
-```
-
----
 
 ## Recomendaciones adicionales
 
